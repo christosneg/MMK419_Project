@@ -26,35 +26,36 @@ permissions:
 jobs:
   pr_commented:
     name: "PR Comment"
+    # Runs when an issue comment is created on a pull request
     if: ${{ github.event_name == 'issue_comment' && github.event.issue.pull_request != null }}
     runs-on: windows-latest
     steps:
       - name: Log PR Comment
-        run: echo "A comment was made on PR #${{ github.event.issue.number }} by ${{ github.actor }}" 
-        env:
-          NUMBER: ${{ github.event.issue.number }}
+        run: echo "A comment was made on PR #${{ github.event.issue.number }} by ${{ github.actor }}"
 
   issue_commented:
     name: "Issue Comment"
+    # Runs when an issue comment is created on an issue
     if: ${{ github.event_name == 'issue_comment' && github.event.issue.pull_request == null }}
     runs-on: windows-latest
     steps:
       - name: Log Issue Comment
         run: echo "A comment was made on issue #${{ github.event.issue.number }} by ${{ github.actor }}"
-        env:
-          NUMBER: ${{ github.event.issue.number }}
 
   test_schedule:
     name: "Test Schedule"
+    # Runs at the specified cron schedule
     runs-on: windows-latest
     steps:
-    #Check if it's Wednesday and skip if True
+      # Check if it's Wednesday and skip if true
       - name: Skip on Wednesday
         run: |
-            if: ["$(date +%u)" -eq 3 ]; then 
-              echo "Skipping because it's Wednesday."
-              exit 0
-            fi
-            echo "Running because it's not Wednesday."
+          if [ "$(date +%u)" -eq 3 ]; then
+            echo "Skipping because it's Wednesday."
+            exit 0
+          fi
+          echo "Running because it's not Wednesday."
+
+      # This step runs regardless of the day
       - name: Always Run
-        run: echo "Always run at $(date)"
+        run: echo "Cron job executed at $(date)"

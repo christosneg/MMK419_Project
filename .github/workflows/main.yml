@@ -2,35 +2,54 @@ name: "Team's Workflow"
 
 on:
   pull_request:
-    types: [opened, edited, closed, reopened, labeled, unlabeled]
+    types: [deleted, opened, converted_to_draft, unassigned, labeled, unlabeled, edited, closed, synchronize, reopened]
   issue_comment:
     types: [created]
   schedule:
     - cron: "0 22 * * 1-5"
+  push:
+    branches:
+      - main
 
 permissions:
+  actions: write
   contents: read
-  pull-requests: write
+  deployments: read
+  id-token: none
   issues: write
+  discussions: write
+  packages: write
+  pull-requests: write
+  security-events: read
+  statuses: write
 
 jobs:
   pr_commented:
     name: "PR Comment"
     if: ${{ github.event_name == 'issue_comment' && github.event.issue.pull_request }}
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
-      - run: echo "A comment was made on PR #${{ github.event.issue.number }} by ${{ github.actor }}"
+      - name: Log PR Comment
+        run: echo "A comment was made on PR #${{ github.event.issue.number }} by ${{ github.actor }}" 
+        env:
+          NUMBER: ${{ github.event.issue.number }}
 
   issue_commented:
     name: "Issue Comment"
     if: ${{ github.event_name == 'issue_comment' && !github.event.issue.pull_request }}
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
-      - run: echo "A comment was made on issue #${{ github.event.issue.number }} by ${{ github.actor }}"
+      - name: Log Issue Comment
+        run: echo "A comment was made on issue #${{ github.event.issue.number }} by ${{ github.actor }}"
+        env:
+          NUMBER: ${{ github.event.issue.number }}
 
   test_schedule:
     name: "Test Schedule"
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
-      - name: Test Cron Job
-        run: echo "Cron job executed at $(date)"
+      - name: Not on Wednesday
+        if: ${{ github.event.schedule == '0 22 * * 3' }}
+        run: echo "This step will be skipped on Wednesday"
+      - name: Always Run
+        run: echo "This step will always run"

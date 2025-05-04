@@ -1,0 +1,56 @@
+name: "Teams Workflow"
+on:
+  pull_request: 
+    types: [deleted, opened, converted_to_draft, unassigned, labeled, unlabeled, edited, closed, synchonize, reopened] 
+  issue_comment: 
+      types: [created]
+      schedule: 
+      - cron: "0 22 * * 1-5"
+  push:
+      branches:
+            - main
+ 
+  
+permissions: 
+    actions: write
+    attestations: read
+    contents: read
+    deployments: none
+    id-token: write
+    issues: write
+    discussions: write
+    packages: write
+    pull-requests: write
+    security-events: read
+    statuses: write
+
+jobs: 
+    pr_commented: 
+       name: "PR Comment"
+       if: ${{ github.event_name == 'issue_comment' && github.event_name.issue.pull_request }}
+       runs-on: windows-latest
+       steps:
+        - name: Log PR Comment
+          run: echo "A comment was made on PR #${{ github.event.issue.number }}
+          env: 
+            NUMBER: ${{ github.event.issue.number }}
+
+    issue_commented:
+      name: "Issue Comment"
+      if: ${{ github.event.name == "issue_comment" && !guthub.event.pull_request }}
+      runs-on: windows-latest
+      steps: 
+      - name: Log Issue Comment
+        run: echo "A comment was made on issue #${{ github.event.issue.number }}
+        env: 
+          NUMBER: ${{ github.event.issue.number }}
+        
+    test_schedule:
+      name: "Test Schedule"
+      runs-on: windows-latest
+      steps:  
+      - name: Not on Wednesday
+        if: ${{ github.event.schedule == '0 22 * * 3' }}
+        run: echo "This step will be skipped on Wednesday"
+      - name: Always run
+        run: echo "This step is permanent and will always run"
